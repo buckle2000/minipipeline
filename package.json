@@ -1,0 +1,12 @@
+{
+  "name": "minipipeline",
+  "version": "0.0.0",
+  "description": "Run task when file change. Designed for ease of use, not purity.",
+  "main": "build/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "chokidar": "^3.3.1",
+    "many-keys-map": "^1.0.2",
+    "minimatch": "^3.0.4"
+  }
+}
