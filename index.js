@@ -21,8 +21,8 @@ var Watcher = class Watcher {
       ignored: /(^|[\/\\])\../, // ignore dotfiles
       persistent: true
     });
-    this.watcher.on('all', (event, path) => {
-      return this.changed(path, event);
+    this.watcher.on('all', (event, path_) => {
+      return this.changed(path_, event);
     });
   }
 
@@ -63,21 +63,22 @@ var Watcher = class Watcher {
     return this.cbs.push([pred, cb]);
   }
 
-  async changed(path, event) {
+  async changed(path_, event) {
     var cb, dependant, deps, i, len, pred, ref, ref1, results, that, x;
+    path_ = path.abspath(path_);
     ref = this.cbs;
     // run cb
     for (i = 0, len = ref.length; i < len; i++) {
       [pred, cb] = ref[i];
-      if (pred(path)) {
+      if (pred(path_)) {
         deps = [];
         that = { // inner API
           depend: function(dependency) {
-            return deps.push(dependency);
+            return deps.push(path.abspath(dependency));
           }
         };
-        await cb.call(that, path, event);
-        this.deps.set([cb, path], deps);
+        await cb.call(that, path_, event);
+        this.deps.set([cb, path_], deps);
       }
     }
     ref1 = this.deps;
@@ -85,7 +86,7 @@ var Watcher = class Watcher {
     results = [];
     for (x of ref1) {
       [[cb, dependant], deps] = x;
-      if (indexOf.call(deps, path) >= 0) {
+      if (indexOf.call(deps, path_) >= 0) {
         results.push((await this.changed(dependant, 'change'))); // most sensible choice among https://github.com/paulmillr/chokidar#methods--events
       } else {
         results.push(void 0);
