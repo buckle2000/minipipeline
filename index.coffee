@@ -1,17 +1,17 @@
-import * as fs from 'fs'
+import * as fs from 'fs-extra'
 import * as path from 'path'
 import minimatch from 'minimatch'
 import ManyKeysMap from 'many-keys-map'
-
+import * as chokidar from 'chokidar'
 
 export class Watcher
 	constructor: (@root) ->
 		@cbs = [] # Array of [pred, cb]
-		@deps = new ManyKeysMap # Map of [cb, path] => [path, path, ...] # TODO fix this
+		@deps = new ManyKeysMap # Map of [cb, path] => [path, path, ...]
 		@watcher = chokidar.watch @root,
 			ignored: /(^|[\/\\])\../ # ignore dotfiles
 			persistent: true
-		@watcher.on 'all', (event, path) => @changed path, event
+		@watcher.on 'all', (event, path_) => @changed path_, event
 
 	when: (pattern, cb) ->
 		unimplemented = -> new Error 'The first argument must be a string, a symbol, a regex, a function or an array of those'
@@ -32,19 +32,20 @@ export class Watcher
 				throw unimplemented()
 		@cbs.push [pred, cb]
 
-	changed: (path, event) ->
+	changed: (path_, event) ->
+		path_ = path.abspath path_
 		# run cb
 		for [pred, cb] in @cbs
-			if pred path
+			if pred path_
 				deps = []
-				that =
-					deps: (dependency) -> deps.push dependency
-				cb.call that, path, event
-				@deps.set([cb, path], deps)
+				that = # inner API
+					depend: (dependency) -> deps.push path.abspath dependency
+				await cb.call that, path_, event
+				@deps.set([cb, path_], deps)
 		# run dependant cb
 		for [[cb, dependant], deps] from @deps
-			if path in deps
-				@changed dependant, 'change' # most sensible choice among https://github.com/paulmillr/chokidar#methods--events
+			if path_ in deps
+				await @changed dependant, 'change' # most sensible choice among https://github.com/paulmillr/chokidar#methods--events
 
 
 ###
@@ -52,8 +53,11 @@ Utility functions
 ###
 
 # Synchronous file io (string)
-export read = (file, options={encoding:'utf8'}) -> fs.readFileSync file, options
-export write = (file, data, options) -> fs.writeFileSync(file, data, options)
+export read = (file, options={encoding:'utf8'}) ->
+	await fs.readFile file, options
+
+export write = (file, data, options) ->
+	await fs.outputFile file, data, options
 
 
 # base of filename

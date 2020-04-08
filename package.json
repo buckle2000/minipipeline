@@ -14,16 +14,18 @@
     "url": "https://github.com/buckle2000/minipipeline.git"
   },
   "scripts": {
-    "prepublish": "rollup -c rollup.config.js"
+    "prepublish": "rollup -c rollup.config.js",
+    "build": "rollup -c rollup.config.js"
   },
   "dependencies": {
     "chokidar": "^3.3.1",
+    "fs-extra": "^9.0.0",
     "many-keys-map": "^1.0.2",
-    "minimatch": "^3.0.4",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0"
+    "minimatch": "^3.0.4"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^11.0.2",
+    "@rollup/plugin-node-resolve": "^7.1.1",
     "coffeescript": "^2.5.1",
     "rollup": "^2.3.4",
     "rollup-plugin-coffee-script": "^2.0.0"
