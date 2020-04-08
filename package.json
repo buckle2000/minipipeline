@@ -1,14 +1,21 @@
 {
+  "name": "minipipeline",
+  "version": "0.0.1",
+  "description": "Run task when file change. Designed for ease of use, not purity.",
+  "keywords": [
+    "asset",
+    "pipeline"
+  ],
+  "main": "index.js",
+  "license": "MIT",
   "author": "buckle2000",
   "repository": {
     "type": "git",
     "url": "https://github.com/buckle2000/minipipeline.git"
   },
-  "name": "minipipeline",
-  "version": "0.0.0",
-  "description": "Run task when file change. Designed for ease of use, not purity.",
-  "main": "index.js",
-  "license": "MIT",
+  "scripts": {
+    "prepublish": "rollup -c rollup.config.js"
+  },
   "dependencies": {
     "chokidar": "^3.3.1",
     "many-keys-map": "^1.0.2",
