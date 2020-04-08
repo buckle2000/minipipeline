@@ -16,7 +16,7 @@ var Watcher = class Watcher {
   constructor(root) {
     this.root = root;
     this.cbs = []; // Array of [pred, cb]
-    this.deps = new ManyKeysMap(); // Map of [cb, path] => [path, path, ...]
+    this.deps = new ManyKeysMap(); // Map of [cb, abspath] => [abspath, abspath, ...]
     this.watcher = chokidar.watch(this.root, {
       ignored: /(^|[\/\\])\../, // ignore dotfiles
       persistent: true
@@ -27,10 +27,7 @@ var Watcher = class Watcher {
   }
 
   when(pattern, cb) {
-    var g, i, len, pred, unimplemented;
-    unimplemented = function() {
-      return new Error('The first argument must be a string, a symbol, a regex, a function or an array of those');
-    };
+    var g, i, len, pred;
     if (pattern instanceof Array) {
       for (i = 0, len = pattern.length; i < len; i++) {
         g = pattern[i];
@@ -58,14 +55,14 @@ var Watcher = class Watcher {
         };
         break;
       default:
-        throw unimplemented();
+        throw new Error('The first argument must be a string, a symbol, a regex, a function or an array of those');
     }
     return this.cbs.push([pred, cb]);
   }
 
   async changed(path_, event) {
-    var cb, dependant, deps, i, len, pred, ref, ref1, results, that, x;
-    path_ = path.abspath(path_);
+    var abspath_, cb, dependant, deps, i, len, pred, ref, ref1, results, that, x;
+    abspath_ = path.abspath(path_);
     ref = this.cbs;
     // run cb
     for (i = 0, len = ref.length; i < len; i++) {
@@ -77,8 +74,8 @@ var Watcher = class Watcher {
             return deps.push(path.abspath(dependency));
           }
         };
-        await cb.call(that, path_, event);
-        this.deps.set([cb, path_], deps);
+        await cb.call(that, path.relative('.', path_), event);
+        this.deps.set([cb, abspath_], deps);
       }
     }
     ref1 = this.deps;
@@ -86,7 +83,7 @@ var Watcher = class Watcher {
     results = [];
     for (x of ref1) {
       [[cb, dependant], deps] = x;
-      if (indexOf.call(deps, path_) >= 0) {
+      if (indexOf.call(deps, abspath_) >= 0) {
         results.push((await this.changed(dependant, 'change'))); // most sensible choice among https://github.com/paulmillr/chokidar#methods--events
       } else {
         results.push(void 0);

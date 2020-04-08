@@ -7,14 +7,13 @@ import * as chokidar from 'chokidar'
 export class Watcher
 	constructor: (@root) ->
 		@cbs = [] # Array of [pred, cb]
-		@deps = new ManyKeysMap # Map of [cb, path] => [path, path, ...]
+		@deps = new ManyKeysMap # Map of [cb, abspath] => [abspath, abspath, ...]
 		@watcher = chokidar.watch @root,
 			ignored: /(^|[\/\\])\../ # ignore dotfiles
 			persistent: true
 		@watcher.on 'all', (event, path_) => @changed path_, event
 
 	when: (pattern, cb) ->
-		unimplemented = -> new Error 'The first argument must be a string, a symbol, a regex, a function or an array of those'
 		if pattern instanceof Array
 			for g in pattern
 				@when g, cb
@@ -29,22 +28,22 @@ export class Watcher
 			when pattern instanceof RegExp
 				pred = (s) -> pattern.test s
 			else
-				throw unimplemented()
+				throw new Error 'The first argument must be a string, a symbol, a regex, a function or an array of those'
 		@cbs.push [pred, cb]
 
 	changed: (path_, event) ->
-		path_ = path.abspath path_
+		abspath_ = path.abspath path_
 		# run cb
 		for [pred, cb] in @cbs
 			if pred path_
 				deps = []
 				that = # inner API
 					depend: (dependency) -> deps.push path.abspath dependency
-				await cb.call that, path_, event
-				@deps.set([cb, path_], deps)
+				await cb.call that, (path.relative '.', path_), event
+				@deps.set([cb, abspath_], deps)
 		# run dependant cb
 		for [[cb, dependant], deps] from @deps
-			if path_ in deps
+			if abspath_ in deps
 				await @changed dependant, 'change' # most sensible choice among https://github.com/paulmillr/chokidar#methods--events
 
 
