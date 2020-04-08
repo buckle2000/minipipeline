@@ -61,21 +61,22 @@ var Watcher = class Watcher {
   }
 
   async changed(path_, event) {
-    var abspath_, cb, dependant, deps, i, len, pred, ref, ref1, results, that, x;
-    abspath_ = path.abspath(path_);
+    var abspath, cb, dependant, deps, i, len, pred, ref, ref1, relpath, results, that, x;
+    abspath = path.abspath(path_);
+    relpath = path.relative('.', path_);
     ref = this.cbs;
     // run cb
     for (i = 0, len = ref.length; i < len; i++) {
       [pred, cb] = ref[i];
-      if (pred(path_)) {
+      if (pred(relpath)) {
         deps = [];
         that = { // inner API
           depend: function(dependency) {
             return deps.push(path.abspath(dependency));
           }
         };
-        await cb.call(that, path.relative('.', path_), event);
-        this.deps.set([cb, abspath_], deps);
+        await cb.call(that, relpath, event);
+        this.deps.set([cb, abspath], deps);
       }
     }
     ref1 = this.deps;
@@ -83,7 +84,7 @@ var Watcher = class Watcher {
     results = [];
     for (x of ref1) {
       [[cb, dependant], deps] = x;
-      if (indexOf.call(deps, abspath_) >= 0) {
+      if (indexOf.call(deps, abspath) >= 0) {
         results.push((await this.changed(dependant, 'change'))); // most sensible choice among https://github.com/paulmillr/chokidar#methods--events
       } else {
         results.push(void 0);

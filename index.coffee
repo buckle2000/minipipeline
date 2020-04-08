@@ -32,18 +32,19 @@ export class Watcher
 		@cbs.push [pred, cb]
 
 	changed: (path_, event) ->
-		abspath_ = path.abspath path_
+		abspath = path.abspath path_
+		relpath = path.relative '.', path_
 		# run cb
 		for [pred, cb] in @cbs
-			if pred path_
+			if pred relpath
 				deps = []
 				that = # inner API
 					depend: (dependency) -> deps.push path.abspath dependency
-				await cb.call that, (path.relative '.', path_), event
-				@deps.set([cb, abspath_], deps)
+				await cb.call that, relpath, event
+				@deps.set([cb, abspath], deps)
 		# run dependant cb
 		for [[cb, dependant], deps] from @deps
-			if abspath_ in deps
+			if abspath in deps
 				await @changed dependant, 'change' # most sensible choice among https://github.com/paulmillr/chokidar#methods--events
 
 
