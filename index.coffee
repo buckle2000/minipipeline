@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import minimatch from 'minimatch'
-import ManyKeysMap from 'many-keys-map'
+import * as ManyKeysMap from 'many-keys-map'
 
 
 export class Watcher
