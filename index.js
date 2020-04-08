@@ -62,17 +62,17 @@ var Watcher = class Watcher {
 
   async changed(path_, event) {
     var abspath, cb, dependant, deps, i, len, pred, ref, ref1, relpath, results, that, x;
-    abspath = path.abspath(path_);
+    abspath = path.resolve(path_);
     relpath = path.relative('.', path_);
     ref = this.cbs;
     // run cb
     for (i = 0, len = ref.length; i < len; i++) {
       [pred, cb] = ref[i];
-      if (pred(relpath)) {
+      if (pred(path_)) {
         deps = [];
         that = { // inner API
           depend: function(dependency) {
-            return deps.push(path.abspath(dependency));
+            return deps.push(path.resolve(dependency));
           }
         };
         await cb.call(that, relpath, event);

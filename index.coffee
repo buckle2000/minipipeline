@@ -32,14 +32,14 @@ export class Watcher
 		@cbs.push [pred, cb]
 
 	changed: (path_, event) ->
-		abspath = path.abspath path_
+		abspath = path.resolve path_
 		relpath = path.relative '.', path_
 		# run cb
 		for [pred, cb] in @cbs
 			if pred relpath
 				deps = []
 				that = # inner API
-					depend: (dependency) -> deps.push path.abspath dependency
+					depend: (dependency) -> deps.push path.resolve dependency
 				await cb.call that, relpath, event
 				@deps.set([cb, abspath], deps)
 		# run dependant cb
