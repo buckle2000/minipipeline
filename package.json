@@ -1,6 +1,6 @@
 {
   "name": "minipipeline",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Run task when file change. Designed for ease of use, not purity.",
   "keywords": [
     "asset",
