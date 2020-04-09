@@ -59,13 +59,20 @@ export read = (file, options={encoding:'utf8'}) ->
 export write = (file, data, options) ->
 	await fs.outputFile file, data, options
 
+export copy = (src, dest) ->
+	await fs.ensureFile dest
+	await fs.copyFile src, dest
 
 # base of filename
 # https://www.gnu.org/software/emacs/manual/html_node/elisp/File-Name-Components.html
-export base = (filename) ->	(path.parse filename).name
+export name = (filename) ->	(path.parse filename).name
 
 # extension of filename
 export ext = (filename) -> (path.parse filename).ext
+
+export reext = (filename, ext) ->
+	{ dir, name } = path.parse filename
+	path.format { dir, name, ext }
 
 export isFile = (filename) ->
 	(await fs.stat filename).isFile()

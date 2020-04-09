@@ -109,15 +109,26 @@ var write = async function(file, data, options) {
   return (await fs.outputFile(file, data, options));
 };
 
+var copy = async function(src, dest) {
+  await fs.ensureFile(dest);
+  return (await fs.copyFile(src, dest));
+};
+
 // base of filename
 // https://www.gnu.org/software/emacs/manual/html_node/elisp/File-Name-Components.html
-var base = function(filename) {
+exports.name = function(filename) {
   return (path.parse(filename)).name;
 };
 
 // extension of filename
 var ext = function(filename) {
   return (path.parse(filename)).ext;
+};
+
+var reext = function(filename, ext) {
+  var dir;
+  ({dir, name: exports.name} = path.parse(filename));
+  return path.format({dir, name: exports.name, ext});
 };
 
 var isFile = async function(filename) {
@@ -129,9 +140,10 @@ var isDirectory = async function(filename) {
 };
 
 exports.Watcher = Watcher;
-exports.base = base;
+exports.copy = copy;
 exports.ext = ext;
 exports.isDirectory = isDirectory;
 exports.isFile = isFile;
 exports.read = read;
+exports.reext = reext;
 exports.write = write;
