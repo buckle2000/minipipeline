@@ -66,3 +66,9 @@ export base = (filename) ->	(path.parse filename).name
 
 # extension of filename
 export ext = (filename) -> (path.parse filename).ext
+
+export isFile = (filename) ->
+	(await fs.stat filename).isFile()
+
+export isDirectory = (filename) ->
+	(await fs.stat filename).isDirectory()

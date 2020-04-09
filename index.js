@@ -68,7 +68,7 @@ var Watcher = class Watcher {
     // run cb
     for (i = 0, len = ref.length; i < len; i++) {
       [pred, cb] = ref[i];
-      if (pred(path_)) {
+      if (pred(relpath)) {
         deps = [];
         that = { // inner API
           depend: function(dependency) {
@@ -120,8 +120,18 @@ var ext = function(filename) {
   return (path.parse(filename)).ext;
 };
 
+var isFile = async function(filename) {
+  return ((await fs.stat(filename))).isFile();
+};
+
+var isDirectory = async function(filename) {
+  return ((await fs.stat(filename))).isDirectory();
+};
+
 exports.Watcher = Watcher;
 exports.base = base;
 exports.ext = ext;
+exports.isDirectory = isDirectory;
+exports.isFile = isFile;
 exports.read = read;
 exports.write = write;
