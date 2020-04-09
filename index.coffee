@@ -13,7 +13,7 @@ export class Watcher
 			persistent: true
 		@watcher.on 'all', (event, path_) => @changed path_, event
 
-	when: (pattern, cb) ->
+	watch: (pattern, cb) ->
 		if pattern instanceof Array
 			for g in pattern
 				@when g, cb

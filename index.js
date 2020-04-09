@@ -26,7 +26,7 @@ var Watcher = class Watcher {
     });
   }
 
-  when(pattern, cb) {
+  watch(pattern, cb) {
     var g, i, len, pred;
     if (pattern instanceof Array) {
       for (i = 0, len = pattern.length; i < len; i++) {
